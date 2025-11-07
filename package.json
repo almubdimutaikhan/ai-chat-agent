@@ -10,7 +10,8 @@
     "test": "vitest",
     "types": "wrangler types env.d.ts --include-runtime false",
     "format": "prettier --write .",
-    "check": "prettier . --check && biome lint && tsc"
+    "check": "prettier . --check && biome lint && tsc",
+    "trello:seed": "node scripts/seed-trello.mjs"
   },
   "keywords": [
     "cloudflare",

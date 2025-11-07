@@ -1,0 +1,176 @@
+{
+  "id": "board-mock-1",
+  "name": "Software Engineering & AI Studies",
+  "labels": [
+    { "id": "label-1", "name": "Study", "color": "blue" },
+    { "id": "label-2", "name": "Work", "color": "green" },
+    { "id": "label-3", "name": "Project", "color": "orange" },
+    { "id": "label-4", "name": "AI/ML", "color": "purple" },
+    { "id": "label-5", "name": "Practice", "color": "yellow" },
+    { "id": "label-6", "name": "Urgent", "color": "red" },
+    { "id": "label-7", "name": "Research", "color": "pink" }
+  ],
+  "lists": [
+    { "id": "list-1", "name": "Backlog", "pos": 1 },
+    { "id": "list-2", "name": "To Do", "pos": 2 },
+    { "id": "list-3", "name": "In Progress", "pos": 3 },
+    { "id": "list-4", "name": "Done", "pos": 4 }
+  ],
+  "cards": [
+    {
+      "id": "card-1",
+      "name": "Complete Cloudflare Workers Tutorial",
+      "desc": "Go through the official Cloudflare Workers documentation and build a simple API",
+      "listId": "list-4",
+      "labelIds": ["label-1", "label-4"],
+      "relativeDueDays": -2,
+      "dueComplete": true,
+      "relativeLastActivityDays": -2,
+      "closed": true
+    },
+    {
+      "id": "card-2",
+      "name": "Study Durable Objects Architecture",
+      "desc": "Deep dive into Durable Objects, state management, and edge computing",
+      "listId": "list-4",
+      "labelIds": ["label-1", "label-7"],
+      "relativeDueDays": -3,
+      "dueComplete": true,
+      "relativeLastActivityDays": -3,
+      "closed": true
+    },
+    {
+      "id": "card-3",
+      "name": "Build Simple Chat Agent",
+      "desc": "Create a basic chat agent using the Agents SDK",
+      "listId": "list-4",
+      "labelIds": ["label-3", "label-4"],
+      "relativeDueDays": -5,
+      "dueComplete": true,
+      "relativeLastActivityDays": -5,
+      "closed": true
+    },
+    {
+      "id": "card-4",
+      "name": "Practice LeetCode - Arrays",
+      "desc": "Solve 5 medium difficulty array problems",
+      "listId": "list-4",
+      "labelIds": ["label-5"],
+      "relativeDueDays": -1,
+      "dueComplete": true,
+      "relativeLastActivityDays": -1,
+      "closed": true
+    },
+    {
+      "id": "card-5",
+      "name": "Review Machine Learning Basics",
+      "desc": "Refresh knowledge on linear regression, gradient descent, and basic ML concepts",
+      "listId": "list-4",
+      "labelIds": ["label-1", "label-4"],
+      "relativeDueDays": -4,
+      "dueComplete": true,
+      "relativeLastActivityDays": -4,
+      "closed": true
+    },
+    {
+      "id": "card-6",
+      "name": "Build AI Task Flow Agent",
+      "desc": "Create an AI agent that analyzes tasks and recommends next actions",
+      "listId": "list-3",
+      "labelIds": ["label-3", "label-4", "label-6"],
+      "relativeDueDays": 3,
+      "dueComplete": false,
+      "relativeLastActivityDays": 0,
+      "closed": false
+    },
+    {
+      "id": "card-7",
+      "name": "Implement Trello API Integration",
+      "desc": "Add OAuth and CRUD operations for Trello boards",
+      "listId": "list-2",
+      "labelIds": ["label-3", "label-6"],
+      "relativeDueDays": 2,
+      "dueComplete": false,
+      "relativeLastActivityDays": 0,
+      "closed": false
+    },
+    {
+      "id": "card-8",
+      "name": "Study TypeScript Advanced Types",
+      "desc": "Learn generics, utility types, and conditional types",
+      "listId": "list-2",
+      "labelIds": ["label-1"],
+      "relativeDueDays": 5,
+      "dueComplete": false,
+      "relativeLastActivityDays": 0,
+      "closed": false
+    },
+    {
+      "id": "card-9",
+      "name": "Practice System Design",
+      "desc": "Study distributed systems, caching strategies, load balancing",
+      "listId": "list-2",
+      "labelIds": ["label-1", "label-5"],
+      "relativeDueDays": 4,
+      "dueComplete": false,
+      "relativeLastActivityDays": 0,
+      "closed": false
+    },
+    {
+      "id": "card-10",
+      "name": "Write Project Documentation",
+      "desc": "Create comprehensive README and API documentation",
+      "listId": "list-2",
+      "labelIds": ["label-3"],
+      "relativeDueDays": 6,
+      "dueComplete": false,
+      "relativeLastActivityDays": 0,
+      "closed": false
+    },
+    {
+      "id": "card-11",
+      "name": "Learn Docker & Kubernetes",
+      "desc": "Complete course on container orchestration",
+      "listId": "list-1",
+      "labelIds": ["label-1"],
+      "relativeDueDays": null,
+      "dueComplete": false,
+      "relativeLastActivityDays": -7,
+      "closed": false
+    },
+    {
+      "id": "card-12",
+      "name": "Build Portfolio Website",
+      "desc": "Create personal website showcasing projects",
+      "listId": "list-1",
+      "labelIds": ["label-3"],
+      "relativeDueDays": null,
+      "dueComplete": false,
+      "relativeLastActivityDays": -10,
+      "closed": false
+    },
+    {
+      "id": "card-13",
+      "name": "Practice LeetCode - Dynamic Programming",
+      "desc": "Master DP patterns and solve 10 hard problems",
+      "listId": "list-1",
+      "labelIds": ["label-5"],
+      "relativeDueDays": null,
+      "dueComplete": false,
+      "relativeLastActivityDays": -5,
+      "closed": false
+    },
+    {
+      "id": "card-14",
+      "name": "Research RAG Architectures",
+      "desc": "Study Retrieval Augmented Generation for LLMs",
+      "listId": "list-1",
+      "labelIds": ["label-4", "label-7"],
+      "relativeDueDays": null,
+      "dueComplete": false,
+      "relativeLastActivityDays": -8,
+      "closed": false
+    }
+  ]
+}
+

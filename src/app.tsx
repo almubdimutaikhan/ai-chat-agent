@@ -14,6 +14,7 @@ import { Toggle } from "@/components/toggle/Toggle";
 import { Textarea } from "@/components/textarea/Textarea";
 import { MemoizedMarkdown } from "@/components/memoized-markdown";
 import { ToolInvocationCard } from "@/components/tool-invocation-card/ToolInvocationCard";
+import { TaskLoader, TypingIndicator } from "@/components/loader/TaskLoader";
 
 // Icon imports
 import {
@@ -28,9 +29,7 @@ import {
 
 // List of tools that require human confirmation
 // NOTE: this should match the tools that don't have execute functions in tools.ts
-const toolsRequiringConfirmation: (keyof typeof tools)[] = [
-  "getWeatherInformation"
-];
+const toolsRequiringConfirmation: (keyof typeof tools)[] = [];
 
 export default function Chat() {
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -159,7 +158,7 @@ export default function Chat() {
           </div>
 
           <div className="flex-1">
-            <h2 className="font-semibold text-base">AI Chat Agent</h2>
+            <h2 className="font-semibold text-base">Task Flow Agent</h2>
           </div>
 
           <div className="flex items-center gap-2 mr-2">
@@ -201,23 +200,47 @@ export default function Chat() {
                   <div className="bg-[#F48120]/10 text-[#F48120] rounded-full p-3 inline-flex">
                     <Robot size={24} />
                   </div>
-                  <h3 className="font-semibold text-lg">Welcome to AI Chat</h3>
+                  <h3 className="font-semibold text-lg">AI Task Flow Agent</h3>
                   <p className="text-muted-foreground text-sm">
-                    Start a conversation with your AI assistant. Try asking
-                    about:
+                    Your intelligent productivity assistant. I can help you:
                   </p>
                   <ul className="text-sm text-left space-y-2">
                     <li className="flex items-center gap-2">
-                      <span className="text-[#F48120]">•</span>
-                      <span>Weather information for any city</span>
+                      <span className="text-[#F48120]">📊</span>
+                      <span>Analyze your tasks and learn patterns</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-[#F48120]">•</span>
-                      <span>Local time in different locations</span>
+                      <span className="text-[#F48120]">🎯</span>
+                      <span>Recommend the best next task</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[#F48120]">📈</span>
+                      <span>Show productivity insights</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[#F48120]">✅</span>
+                      <span>Track task completions</span>
                     </li>
                   </ul>
+                  <div className="mt-4 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+                    <p className="text-xs text-muted-foreground">
+                      Try: <span className="font-mono text-[#F48120]">"Analyze my tasks"</span> or <span className="font-mono text-[#F48120]">"What should I work on next?"</span>
+                    </p>
+                  </div>
                 </div>
               </Card>
+            </div>
+          )}
+
+          {/* Show loading indicator when AI is thinking */}
+          {(status === "submitted" || status === "streaming") && agentMessages.length > 0 && agentMessages[agentMessages.length - 1]?.role === "user" && (
+            <div className="flex justify-start">
+              <div className="flex gap-2 max-w-[85%]">
+                <Avatar username="TF" />
+                <Card className="p-3 rounded-md bg-neutral-100 dark:bg-neutral-900 rounded-bl-none border-assistant-border">
+                  <TypingIndicator />
+                </Card>
+              </div>
             </div>
           )}
 
@@ -242,7 +265,7 @@ export default function Chat() {
                     }`}
                   >
                     {showAvatar && !isUser ? (
-                      <Avatar username={"AI"} />
+                      <Avatar username={"TF"} />
                     ) : (
                       !isUser && <div className="w-8" />
                     )}
@@ -309,28 +332,39 @@ export default function Chat() {
                             // Skip rendering the card in debug mode
                             if (showDebug) return null;
 
+                            // Show special loading for task analysis tools
+                            const isTaskTool = ['analyzeTasks', 'getNextTask', 'getProductivityInsights'].includes(toolName);
+                            const loadingMessage = isTaskTool 
+                              ? toolName === 'analyzeTasks' ? 'Analyzing your task patterns...'
+                              : toolName === 'getNextTask' ? 'Finding your optimal next task...'
+                              : 'Calculating productivity insights...'
+                              : undefined;
+
                             return (
-                              <ToolInvocationCard
-                                // biome-ignore lint/suspicious/noArrayIndexKey: using index is safe here as the array is static
-                                key={`${toolCallId}-${i}`}
-                                toolUIPart={part}
-                                toolCallId={toolCallId}
-                                needsConfirmation={needsConfirmation}
-                                onSubmit={({ toolCallId, result }) => {
-                                  addToolResult({
-                                    tool: part.type.replace("tool-", ""),
-                                    toolCallId,
-                                    output: result
-                                  });
-                                }}
-                                addToolResult={(toolCallId, result) => {
-                                  addToolResult({
-                                    tool: part.type.replace("tool-", ""),
-                                    toolCallId,
-                                    output: result
-                                  });
-                                }}
-                              />
+                              <div key={`${toolCallId}-${i}`}>
+                                {part.state === 'streaming' && isTaskTool && (
+                                  <TaskLoader message={loadingMessage} size="small" />
+                                )}
+                                <ToolInvocationCard
+                                  toolUIPart={part}
+                                  toolCallId={toolCallId}
+                                  needsConfirmation={needsConfirmation}
+                                  onSubmit={({ toolCallId, result }) => {
+                                    addToolResult({
+                                      tool: part.type.replace("tool-", ""),
+                                      toolCallId,
+                                      output: result
+                                    });
+                                  }}
+                                  addToolResult={(toolCallId, result) => {
+                                    addToolResult({
+                                      tool: part.type.replace("tool-", ""),
+                                      toolCallId,
+                                      output: result
+                                    });
+                                  }}
+                                />
+                              </div>
                             );
                           }
                           return null;

@@ -1,25 +1,45 @@
-# 🤖 Chat Agent Starter Kit
+# 🤖 AI Task Flow Agent
 
-![npm i agents command](./npm-agents-banner.svg)
+> **🚀 Live Demo**: This project is deployed on Cloudflare Workers with real Trello integration. The agent actively syncs with a live Trello board and can create/update tasks via natural language chat.
 
-<a href="https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/agents-starter"><img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare"/></a>
+An intelligent productivity assistant built on Cloudflare's edge platform. This AI agent analyzes your tasks, learns productivity patterns, and recommends optimal next actions—all powered by Cloudflare Workers, Durable Objects, and the Agents SDK.
 
-A starter template for building AI-powered chat agents using Cloudflare's Agent platform, powered by [`agents`](https://www.npmjs.com/package/agents). This project provides a foundation for creating interactive chat experiences with AI, complete with a modern UI and tool integration capabilities.
+## ✨ Features
 
-## Features
+### Core Capabilities
+- 🎯 **Smart Task Recommendations** – AI suggests the best next task based on urgency, time-of-day patterns, and your productivity history
+- 📊 **Task Pattern Learning** – Analyzes completed tasks to predict completion times and identify peak productivity windows
+- 🔗 **Trello Integration** – Syncs with your Trello board, creates cards, and moves tasks between lists via natural language
+- 💾 **Persistent Memory** – Stores task patterns, completion history, and insights in SQLite (Durable Objects)
+- ⚡ **Real-time Streaming** – Streams AI responses with live tool execution feedback
+- 📈 **Productivity Insights** – Shows completion rates, category breakdowns, and time analytics
 
-- 💬 Interactive chat interface with AI
-- 🛠️ Built-in tool system with human-in-the-loop confirmation
-- 📅 Advanced task scheduling (one-time, delayed, and recurring via cron)
-- 🌓 Dark/Light theme support
-- ⚡️ Real-time streaming responses
-- 🔄 State management and chat history
-- 🎨 Modern, responsive UI
+### Technical Highlights
+- Built on **Cloudflare Workers** and **Durable Objects**
+- Uses **OpenAI GPT-4o** for intelligent reasoning
+- **SQLite** database for state persistence
+- **Agent-based architecture** with custom tools
+- **React UI** with dark/light theme
+- **Type-safe** TypeScript throughout
+
+## 🏗️ Architecture
+
+This project demonstrates a production-ready AI application built entirely on Cloudflare:
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **LLM** | OpenAI GPT-4o (via AI SDK) | Natural language understanding & reasoning |
+| **Coordination** | Cloudflare Workers + Durable Objects | Edge compute & state management |
+| **Memory** | SQLite in Durable Objects | Persistent task patterns & history |
+| **User Input** | React chat UI (served via Workers Assets) | Interactive conversation interface |
+| **External API** | Trello REST API | Real-world task management integration |
+| **Scheduling** | Agent scheduling API | Future task execution |
 
 ## Prerequisites
 
-- Cloudflare account
-- OpenAI API key
+- Cloudflare account (for deployment)
+- OpenAI API key ([get one here](https://platform.openai.com/api-keys))
+- Trello API credentials ([get them here](https://trello.com/app-key))
 
 ## Quick Start
 
@@ -41,198 +61,116 @@ Create a `.dev.vars` file:
 
 ```env
 OPENAI_API_KEY=your_openai_api_key
+TRELLO_API_KEY=your_trello_api_key
+TRELLO_TOKEN=your_trello_token
+# Optional: reuse an existing board seeded by the script below
+# TRELLO_BOARD_ID=your_board_id
 ```
 
-4. Run locally:
+4. (Optional) Seed a Trello board with the mock tasks:
+
+```bash
+npm run trello:seed
+```
+
+This command will create (or update) a Trello board named **Task Flow Agent Demo Board** with the mock data found in `data/mock-trello-board.json`. The script lists the generated board URL and suggests a `TRELLO_BOARD_ID` value you can add to `.dev.vars` for reuse.
+
+5. Run locally:
 
 ```bash
 npm start
 ```
 
-5. Deploy:
+6. Deploy:
 
 ```bash
 npm run deploy
 ```
 
-## Project Structure
+## 🚀 Try It Out
 
+Once running (locally or deployed), try these commands in the chat:
+
+### Task Analysis
 ```
-├── src/
-│   ├── app.tsx        # Chat UI implementation
-│   ├── server.ts      # Chat agent logic
-│   ├── tools.ts       # Tool definitions
-│   ├── utils.ts       # Helper functions
-│   └── styles.css     # UI styling
+"Analyze my tasks"
 ```
+The agent fetches your Trello board (or uses mock data) and learns productivity patterns.
 
-## Customization Guide
-
-### Adding New Tools
-
-Add new tools in `tools.ts` using the tool builder:
-
-```ts
-// Example of a tool that requires confirmation
-const searchDatabase = tool({
-  description: "Search the database for user records",
-  parameters: z.object({
-    query: z.string(),
-    limit: z.number().optional()
-  })
-  // No execute function = requires confirmation
-});
-
-// Example of an auto-executing tool
-const getCurrentTime = tool({
-  description: "Get current server time",
-  parameters: z.object({}),
-  execute: async () => new Date().toISOString()
-});
-
-// Scheduling tool implementation
-const scheduleTask = tool({
-  description:
-    "schedule a task to be executed at a later time. 'when' can be a date, a delay in seconds, or a cron pattern.",
-  parameters: z.object({
-    type: z.enum(["scheduled", "delayed", "cron"]),
-    when: z.union([z.number(), z.string()]),
-    payload: z.string()
-  }),
-  execute: async ({ type, when, payload }) => {
-    // ... see the implementation in tools.ts
-  }
-});
+### Get Recommendations
 ```
-
-To handle tool confirmations, add execution functions to the `executions` object:
-
-```typescript
-export const executions = {
-  searchDatabase: async ({
-    query,
-    limit
-  }: {
-    query: string;
-    limit?: number;
-  }) => {
-    // Implementation for when the tool is confirmed
-    const results = await db.search(query, limit);
-    return results;
-  }
-  // Add more execution handlers for other tools that require confirmation
-};
+"What should I work on next?"
+"I'm feeling focused, what's the best task for now?"
 ```
+AI recommends the optimal task based on urgency, time-of-day, and your patterns.
 
-Tools can be configured in two ways:
-
-1. With an `execute` function for automatic execution
-2. Without an `execute` function, requiring confirmation and using the `executions` object to handle the confirmed action. NOTE: The keys in `executions` should match `toolsRequiringConfirmation` in `app.tsx`.
-
-### Use a different AI model provider
-
-The starting [`server.ts`](https://github.com/cloudflare/agents-starter/blob/main/src/server.ts) implementation uses the [`ai-sdk`](https://sdk.vercel.ai/docs/introduction) and the [OpenAI provider](https://sdk.vercel.ai/providers/ai-sdk-providers/openai), but you can use any AI model provider by:
-
-1. Installing an alternative AI provider for the `ai-sdk`, such as the [`workers-ai-provider`](https://sdk.vercel.ai/providers/community-providers/cloudflare-workers-ai) or [`anthropic`](https://sdk.vercel.ai/providers/ai-sdk-providers/anthropic) provider:
-2. Replacing the AI SDK with the [OpenAI SDK](https://github.com/openai/openai-node)
-3. Using the Cloudflare [Workers AI + AI Gateway](https://developers.cloudflare.com/ai-gateway/providers/workersai/#workers-binding) binding API directly
-
-For example, to use the [`workers-ai-provider`](https://sdk.vercel.ai/providers/community-providers/cloudflare-workers-ai), install the package:
-
-```sh
-npm install workers-ai-provider
+### Trello Actions (requires Trello credentials)
 ```
-
-Add an `ai` binding to `wrangler.jsonc`:
-
-```jsonc
-// rest of file
-  "ai": {
-    "binding": "AI"
-  }
-// rest of file
+"Add a task 'Research competitors' to the Backlog"
+"Move 'Build AI Task Flow Agent' to Done"
+"Mark 'Study TypeScript' as complete with a note that I finished all exercises"
 ```
+The agent directly updates your Trello board and confirms the changes.
 
-Replace the `@ai-sdk/openai` import and usage with the `workers-ai-provider`:
-
-```diff
-// server.ts
-// Change the imports
-- import { openai } from "@ai-sdk/openai";
-+ import { createWorkersAI } from 'workers-ai-provider';
-
-// Create a Workers AI instance
-+ const workersai = createWorkersAI({ binding: env.AI });
-
-// Use it when calling the streamText method (or other methods)
-// from the ai-sdk
-- const model = openai("gpt-4o-2024-11-20");
-+ const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b")
+### Insights
 ```
+"Show me my productivity insights"
+"What are my completion patterns?"
+```
+View statistics on task categories, average times, and success rates.
 
-Commit your changes and then run the `agents-starter` as per the rest of this README.
 
-### Modifying the UI
+## 🎯 What This Demonstrates
 
-The chat interface is built with React and can be customized in `app.tsx`:
+This project showcases key Cloudflare capabilities for building production AI applications:
 
-- Modify the theme colors in `styles.css`
-- Add new UI components in the chat container
-- Customize message rendering and tool confirmation dialogs
-- Add new controls to the header
+### ✅ LLM Integration
+- Uses OpenAI GPT-4o with streaming responses
+- Can be swapped to Workers AI (Llama 3.3) or other providers via AI SDK
 
-### Example Use Cases
+### ✅ Workflow & Coordination
+- **Cloudflare Workers**: Handles HTTP requests and routing
+- **Durable Objects**: Manages agent state and SQLite database
+- **Agent SDK**: Provides scheduling, state management, and tool execution
 
-1. **Customer Support Agent**
-   - Add tools for:
-     - Ticket creation/lookup
-     - Order status checking
-     - Product recommendations
-     - FAQ database search
+### ✅ User Input via Chat
+- React-based chat UI with real-time streaming
+- WebSocket connection to Durable Object agent
+- Loading states and tool execution feedback
 
-2. **Development Assistant**
-   - Integrate tools for:
-     - Code linting
-     - Git operations
-     - Documentation search
-     - Dependency checking
+### ✅ Memory & State
+- **SQLite in Durable Objects**: Stores task patterns, completion history, recommendations
+- **Persistent agent state**: Chat history and learned patterns survive restarts
+- **Database migrations**: Automatic schema initialization
 
-3. **Data Analysis Assistant**
-   - Build tools for:
-     - Database querying
-     - Data visualization
-     - Statistical analysis
-     - Report generation
+### 🔧 Advanced Features
+- **External API integration**: Real-time Trello synchronization
+- **Tool-based architecture**: 10+ custom tools for task management
+- **Pattern recognition**: ML-inspired scoring algorithm for task prioritization
+- **Error handling**: Graceful fallbacks when services unavailable
 
-4. **Personal Productivity Assistant**
-   - Implement tools for:
-     - Task scheduling with flexible timing options
-     - One-time, delayed, and recurring task management
-     - Task tracking with reminders
-     - Email drafting
-     - Note taking
+## 📚 Key Implementation Details
 
-5. **Scheduling Assistant**
-   - Build tools for:
-     - One-time event scheduling using specific dates
-     - Delayed task execution (e.g., "remind me in 30 minutes")
-     - Recurring tasks using cron patterns
-     - Task payload management
-     - Flexible scheduling patterns
+### Task Analysis Algorithm
+The recommendation engine (`task-analyzer.ts`) scores tasks based on:
+- **Urgency**: Due dates and "Urgent" labels
+- **Context matching**: Time-of-day patterns (morning for study, evening for projects)
+- **Status**: In-progress tasks get priority
+- **Focus level**: Matches task difficulty to current focus state
 
-Each use case can be implemented by:
+### Database Schema
+SQLite stores:
+- `task_patterns`: Learned completion times and success rates per category
+- `task_history`: Individual task completions with metadata
+- `recommendations`: Past AI suggestions for accuracy tracking
+- `trello_boards`: Sync metadata
+- `trello_cards_snapshot`: Cached board state
 
-1. Adding relevant tools in `tools.ts`
-2. Customizing the UI for specific interactions
-3. Extending the agent's capabilities in `server.ts`
-4. Adding any necessary external API integrations
+### Tool Architecture
+All tools follow a consistent pattern:
+1. Load board data (Trello API or mock fallback)
+2. Execute business logic
+3. Update database
+4. Return structured response to LLM
 
-## Learn More
-
-- [`agents`](https://github.com/cloudflare/agents/blob/main/packages/agents/README.md)
-- [Cloudflare Agents Documentation](https://developers.cloudflare.com/agents/)
-- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
-
-## License
-
-MIT
+Tools automatically execute without confirmation—perfect for fast workflows.

@@ -4,6 +4,10 @@ declare namespace Cloudflare {
 	interface Env {
 		Chat: DurableObjectNamespace<import("./src/server").Chat>;
 		AI: Ai;
+		TRELLO_API_KEY?: string;
+		TRELLO_TOKEN?: string;
+		TRELLO_BOARD_ID?: string;
+		TRELLO_BOARD_NAME?: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
