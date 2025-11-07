@@ -13,18 +13,9 @@ import {
   createUIMessageStreamResponse,
   type ToolSet
 } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { processToolCalls, cleanupMessages } from "./utils";
 import { tools, executions } from "./tools";
-import { DATABASE_SCHEMA } from "./database-schema";
-// import { env } from "cloudflare:workers";
-
-const model = openai("gpt-4o-2024-11-20");
-// Cloudflare AI Gateway
-// const openai = createOpenAI({
-//   apiKey: env.OPENAI_API_KEY,
-//   baseURL: env.GATEWAY_BASE_URL,
-// });
 
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
@@ -133,6 +124,17 @@ export class Chat extends AIChatAgent<Env> {
     // Initialize database on first message
     await this.initializeDatabase();
 
+    // Create OpenAI client with API key from env
+    const apiKey = this.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not set. Please configure it in your environment.");
+    }
+
+    const openai = createOpenAI({
+      apiKey: apiKey,
+    });
+    const model = openai("gpt-4o-2024-11-20");
+
     // const mcpConnection = await this.mcp.connect(
     //   "https://path-to-mcp-server/sse"
     // );
@@ -226,16 +228,20 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/check-open-ai-key") {
-      const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+      const hasOpenAIKey = !!(env.OPENAI_API_KEY || process.env.OPENAI_API_KEY);
       return Response.json({
         success: hasOpenAIKey
       });
     }
-    if (!process.env.OPENAI_API_KEY) {
+    
+    // Check both env and process.env (process.env works locally, env works in production)
+    const openAIKey = env.OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+    if (!openAIKey) {
       console.error(
-        "OPENAI_API_KEY is not set, don't forget to set it locally in .dev.vars, and use `wrangler secret bulk .dev.vars` to upload it to production"
+        "OPENAI_API_KEY is not set, don't forget to set it locally in .dev.vars, and use `wrangler secret put OPENAI_API_KEY` to upload it to production"
       );
     }
+    
     return (
       // Route the request to our agent or return 404 if not found
       (await routeAgentRequest(request, env)) ||
